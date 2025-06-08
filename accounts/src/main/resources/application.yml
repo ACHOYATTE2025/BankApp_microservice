@@ -1,0 +1,16 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/accountDb_bank
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: dreamcast1985
+  jpa:
+    
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  
