@@ -1,5 +1,7 @@
 package com.microBank.accounts.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.stereotype.Service;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.microBank.accounts.dto.CustomerDto;
 import com.microBank.accounts.entity.Accounts;
 import com.microBank.accounts.entity.Customer;
+import com.microBank.accounts.exception.CustomerAlreadyExistsException;
 import com.microBank.accounts.mapper.CustomerMapper;
 import com.microBank.accounts.repository.AccountsRepository;
 import com.microBank.accounts.repository.CostumerRepository;
@@ -27,10 +30,18 @@ public class AccountsServiceImpl implements IAccountService {
   @Override
   public void createAccount(CustomerDto customerDto) {
     Customer costumer = CustomerMapper.mapToCustomer(customerDto ,new Customer()) ;
-   Customer savedCustomer= costumerRepository.save(costumer);
-   accountsRepository.save(createNewAccount(savedCustomer));
+
+    Optional<Customer > optionalCustomer= costumerRepository.findByEmail(costumer.getEmail());
+    if(optionalCustomer.isPresent()){
+      throw new CustomerAlreadyExistsException("Customer exist already with given email  "+customerDto.getEmail());
+    }
+    costumer.setCreatedAt(LocalDateTime.now());
+    costumer.setCreatedBy(costumer.getName());
     
-  } 
+    Customer savedCustomer= costumerRepository.save(costumer);
+    accountsRepository.save(createNewAccount(savedCustomer));
+    
+  }
 
   //return the new account details
   private Accounts createNewAccount(Customer customer){
@@ -40,6 +51,8 @@ public class AccountsServiceImpl implements IAccountService {
     newAccount.setAccountNumber(randomAccNumber);
     newAccount.setAccounType("SAVINGS");
     newAccount.setBranchAdress("BOUAFLE");
+    newAccount.setCreatedAt(LocalDateTime.now());
+    newAccount.setCreatedBy(customer.getName());
     return newAccount;
     
   }
